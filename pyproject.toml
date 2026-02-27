@@ -1,23 +1,39 @@
 [project]
 name = "eprofiler"
-version = "0.0.5"
+version = "0.0.6"
 description = "a simple tool to monitor execution times of functions."
 readme = "README.md"
-authors = [{name="emre", email=""}]
+authors = [{name="emre"}]
 license = {file = "LICENSE"}
 classifiers = [
     "Development Status :: 2 - Pre-Alpha",
     "Operating System :: OS Independent",
     "License :: OSI Approved :: MIT License",
+    "Topic :: Software Development :: Libraries :: Python Modules",
     "Programming Language :: Python",
     "Programming Language :: Python :: 3",
-    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Programming Language :: Python :: 3.4", # Explicitly include 3.4
+    "Programming Language :: Python :: 3.5",
+    "Programming Language :: Python :: 3.6",
+    "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
 ]
 keywords = ["profiling", "Profilers"]
-
+requires-python = ">=3.4"
 dependencies = []
 
 [project.urls]
 Homepage = 'https://github.com/eyukselen/eprofiler'
 Documentation = 'https://eprofiler.readthedocs.io/en/latest/'
 "Source Code" = 'https://github.com/eyukselen/eprofiler'
+
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+packages = ["eprofiler"]

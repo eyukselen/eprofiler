@@ -1,7 +1,7 @@
 eprofiler module
 ==================
 
-.. automodule:: eprofiler.eprofiler
+.. automodule:: eprofiler
    :members:
    :undoc-members:
    :show-inheritance:

@@ -1,96 +1,114 @@
 Usage Guide
 ===========
 
-`eprofiler` provides multiple ways to measure performance, from simple timing to detailed memory profiling.
+`eprofiler` provides a tiered approach to performance measurement, allowing you to choose the level of detail you need—from lightweight timing to deep-dive CPU and memory forensics.
 
-Basic Timing
-------------
+.. note::
+   All decorators in `eprofiler` are "smart." You can use them without parentheses for default settings, or with parentheses to provide custom labels and callbacks.
 
-Use the `@timeit` decorator to measure the execution time of a function. By default, it prints the results to the console.
+Basic Timing (`@timeit`)
+------------------------
+
+Use the `@timeit` decorator for high-performance wall-clock timing.
 
 .. code-block:: python
 
     from eprofiler import timeit
 
-    @timeit(label="My Task")
+    # Default usage
+    @timeit
     def simple_task():
-        return [x**2 for x in range(10000)]
-
-    simple_task()
-
-Capturing Stats in a Dictionary
--------------------------------
-
-If you want to use the profiling data within your application logic, pass a dictionary as the first argument.
-
-.. code-block:: python
-
-    from eprofiler import timeit
-
-    stats = {}
-
-    @timeit(stats, label="Data Processing")
-    def process_data():
-        # logic here
         pass
 
-    process_data()
-    print(f"Total time taken: {stats['duration']}s")
+    # Custom usage
+    @timeit(label="Heavy Computation")
+    def heavy_task():
+        return [x**2 for x in range(10000)]
 
-Memory and Full Profiling
--------------------------
 
-To track memory usage (peak and current), use `@memit` or `@profile`. The `@profile` decorator combines both time and memory tracking.
+
+Full Health Check (`@profile`)
+------------------------------
+
+The `@profile` decorator provides a comprehensive overview of wall-clock duration, CPU time (process time), and memory usage (current and peak).
 
 .. code-block:: python
 
     from eprofiler import profile
 
-    @profile(label="Memory Intensive")
-    def heavy_function():
+    @profile(label="System Audit")
+    def audit_function():
         data = [i for i in range(1000000)]
-        return data
+        return sum(data)
 
-    heavy_function()
+    # Output: {'label': 'System Audit', 'duration': 0.12, 'cpu_time': 0.11, 'peak': 32000, ...}
+
+CPU Forensic Profiling (`@profile_cpu`)
+---------------------------------------
+
+When you need to understand how much of the "Wall Time" was actually spent using the processor versus waiting for I/O or sleep, use `@profile_cpu`.
+
+On Unix systems, this also provides a breakdown of **User** vs **System** time and calculates **Efficiency**.
+
+.. code-block:: python
+
+    from eprofiler import profile_cpu
+
+    @profile_cpu(label="I/O vs CPU Test")
+    def io_bound_task():
+        import time
+        time.sleep(1) # This increases 'duration' but not 'cpu_time'
+        return sum(range(1000000))
+
+
+
+Memory Tracking (`@memit`)
+--------------------------
+
+If you are only concerned about memory leaks or peak allocation, use `@memit`. It starts a `tracemalloc` session specifically for that function.
+
+.. code-block:: python
+
+    from eprofiler import memit
+
+    @memit
+    def allocate_memory():
+        return [0] * (10**6)
 
 The Timer Class
 ---------------
 
-The `Timer` class is highly versatile. It can be used as a decorator or as a context manager to time specific blocks of code.
+The `Timer` class is a versatile tool that works as both a decorator and a context manager.
 
 **As a Context Manager:**
+Perfect for timing a specific subset of code within a large function.
 
 .. code-block:: python
 
     from eprofiler import Timer
 
-    with Timer("IO Operation") as t:
-        # Only this block is timed
-        with open("large_file.txt", "w") as f:
-            f.write("test" * 1000000)
+    def complex_workflow():
+        setup_logic()
 
-    print(f"File write took: {t.stats['duration']}s")
+        with Timer("Database Push") as t:
+            # Only this block is timed
+            push_to_db()
 
-**As a Decorator:**
+        print(f"DB Push took: {t.stats['duration']}s")
+        teardown_logic()
 
-.. code-block:: python
+Callbacks
+---------
 
-    from eprofiler import Timer
-
-    @Timer(label="Decorated Timer")
-    def another_func():
-        pass
-
-Using Callbacks
----------------
-
-You can also pass a callback function to handle stats whenever a measurement is completed.
+Instead of printing to `stdout`, you can redirect results to a logger, database, or monitoring service using the `callback` argument.
 
 .. code-block:: python
 
-    def my_logger(stats):
-        print(f"LOG: {stats['label']} took {stats['duration']}s")
+    import logging
 
-    @timeit(callback=my_logger, label="Callback Example")
-    def tracked_func():
+    def log_stats(stats):
+        logging.info(f"{stats['function']} ran in {stats['duration']}s")
+
+    @profile(callback=log_stats)
+    def production_service():
         pass

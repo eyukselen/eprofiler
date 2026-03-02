@@ -6,6 +6,8 @@ A lightweight, zero-dependency toolkit to monitor performance and audit function
 `eprofiler` provides high-precision decorators and context managers to identify bottlenecks and log execution metadata with minimal friction.
 
 [![PyPI version](https://img.shields.io/pypi/v/eprofiler.svg)](https://pypi.org/project/eprofiler/)
+[![Documentation Status](https://readthedocs.org/projects/eprofiler/badge/?version=latest)](https://eprofiler.readthedocs.io/en/latest/?badge=latest)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 ## Installation
 

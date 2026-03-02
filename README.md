@@ -1,33 +1,49 @@
 # eprofiler
 
-**Execution & Memory Profiler for Python**
+**Modern Execution, Memory & Audit Profiler for Python**
 
-A lightweight, zero-dependency toolset to monitor execution time and memory usage. 
-eprofiler provides decorators and context managers to help you identify bottlenecks 
-with minimal code.
+A lightweight, zero-dependency toolkit to monitor performance and audit function lifecycles. 
+`eprofiler` provides high-precision decorators and context managers to identify bottlenecks and log execution metadata with minimal friction.
 
 [![PyPI version](https://img.shields.io/pypi/v/eprofiler.svg)](https://pypi.org/project/eprofiler/)
 
 ## Installation
 
-`pip install eprofiler`
+```bash
+pip install eprofiler
+```
 
-## Features
+## Core Tools
 
-* @timeit: High-resolution execution timing.
-* @memit: Simple peak memory tracking.
-* @profile: Combined time and memory profiling in one shot.
-* Timer: A versatile class that works as both a context manager and a decorator.
-* Stats Capture: Pass a dictionary to handle results programmatically instead of printing.
+* **`@audit`**: Execution logging with `SUCCESS`/`FAIL` status and error capturing.
+* **`@timeit`**: Execution timing (microsecond precision).
+* **`@memit`**: Simple peak memory tracking using `tracemalloc`.
+* **`@profile` / `@profile_cpu`**: Combined time, memory, and CPU profiling.
+* **`Timer`**: Context manager and/or decorator for granular blocks.
 
 ---
 
 ## Usage
 
-### 1. Basic Timing (@timeit)
-By default, decorators print a results dictionary to the console.
+### 1. Function Auditing (`@audit`)
+Ideal for production logs where you need to know if a function finished, how long it took, and why it failed. 
+Optinally which args used.
 
+```python
+from eprofiler import audit
 
+@audit(label="PAYMENT_GATEWAY", include_args=True)
+def process_payment(user_id, amount):
+    # Logic here...
+    return True
+
+process_payment(123, 50.0)
+```
+**Output (Standard Logging):**
+`INFO: {'timestamp': '2026-03-02T10:00:00.123', 'function': 'process_payment', 'label': 'PAYMENT_GATEWAY', 'args': (123, 50.0), 'status': 'SUCCESS', 'elapsed_seconds': '0.045200'}`
+
+### 2. Basic Timing (`@timeit`)
+For quick performance checks during development. By default, results are printed to the console.
 
 ```python
 from eprofiler import timeit
@@ -38,27 +54,10 @@ def my_func():
 
 my_func()
 ```
- Output: {'label': 'Computation', 'function': 'my_func', 'duration': 0.008...}
+**Output:** `{'label': 'Computation', 'function': 'my_func', 'duration': 0.008421}`
 
-### 2. Capturing Results in a Dictionary
-If you pass a dictionary as the first argument, eprofiler populates it with the results instead of printing.
-
-```python
-from eprofiler import timeit
-
-results = {}
-
-@timeit(results)
-def process_data():
-    # ... logic ...
-    pass
-
-process_data()
-print(f"Time taken: {results['duration']} seconds")
-```
-
-### 3. Comprehensive Profiling (@profile)
-Track both time and memory (current and peak) simultaneously.
+### 3. Comprehensive Profiling (`@profile`)
+Track time and memory (current and peak) simultaneously.
 ```python
 from eprofiler import profile
 
@@ -68,36 +67,34 @@ def memory_intensive():
 
 memory_intensive()
 ```
-Output: {'label': 'Heavy Task', 'function': 'memory_intensive', 'duration': 0.04, 'peak': 324502, 'current': 1204}
+**Output:** `{'label': 'Heavy Task', 'function': 'memory_intensive', 'duration': 0.041200, 'peak': 324502, 'current': 1204}`
 
-### 4. The Timer Class
-The Timer class is perfect for timing specific blocks of code or being used as a persistent profiler.
+### 4. Advanced: Callbacks & Custom Capture
+Instead of printing to the console, you can capture results programmatically.
 
 ```python
-from eprofiler import Timer
+from eprofiler import audit
 
-# Use as a context manager
-with Timer("Database Query") as t:
-    # ... code to time ...
-    pass
-print(t.stats)
+def my_db_callback(payload):
+    # Send payload to Datadog, Slack, or a Database
+    print(f"Captured: {payload['status']} in {payload['elapsed_seconds']}s")
 
-# Use as a decorator
-@Timer("Critical Path")
-def critical_logic():
+@audit(callback=my_db_callback)
+def sync_data():
     pass
 ```
 
 ---
 
 ## Links
-* PyPI: https://pypi.org/project/eprofiler/
-* GitHub: https://github.com/eyukselen/eprofiler
-* readthedocs: https://eprofiler.readthedocs.io/en/latest
+* **PyPI**: [https://pypi.org/project/eprofiler/](https://pypi.org/project/eprofiler/)
+* **GitHub**: [https://github.com/eyukselen/eprofiler](https://github.com/eyukselen/eprofiler)
+* **Docs**: [https://eprofiler.readthedocs.io](https://eprofiler.readthedocs.io)
 
 ---
 
-### Accuracy Note
-When using @profile or @memit, Python's tracemalloc is enabled. 
-This adds a slight "Tracer Tax" (overhead) to execution time. 
-For the most precise timing-only results, use @timeit.
+### Why eprofiler?
+1. **Fixed-Width Timing:** All durations use `:.6f` formatting for perfect vertical alignment in logs.
+2. **Machine Readable:** All outputs are valid Python dictionaries (easily convertible to JSON).
+3. **Fail-Safe:** The `@audit` decorator uses `logger.exception` to ensure stack traces are preserved on failure.
+4. **Accuracy Note:** When using `@profile` or `@memit`, Python's `tracemalloc` adds a slight overhead. For the most precise timing-only results, use `@timeit`.

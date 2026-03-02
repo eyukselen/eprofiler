@@ -112,3 +112,16 @@ Instead of printing to `stdout`, you can redirect results to a logger, database,
     @profile(callback=log_stats)
     def production_service():
         pass
+
+Using the Auditor
+-----------------
+
+To monitor function inputs and outputs:
+
+.. code-block:: python
+
+   from eprofiler import audit
+
+   @audit()
+   def my_function(a, b):
+       return a + b

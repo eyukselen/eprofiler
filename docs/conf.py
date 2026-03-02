@@ -1,6 +1,6 @@
-# Configuration file for the Sphinx documentation builder.
 import sys
 import os
+import eprofiler
 
 
 sys.path.insert(0, os.path.abspath(".."))
@@ -8,10 +8,10 @@ sys.path.insert(0, os.path.abspath(".."))
 project = "eprofiler"
 copyright = "2026, emre"
 author = "emre"
-release = "0.0.7"
+release = eprofiler.__version__
 source_suffix = ".rst"
 master_doc = "index"
-version = "0.0.7"
+version = eprofiler.__version__
 
 extensions = [
     "sphinx.ext.autodoc",
@@ -27,9 +27,6 @@ napoleon_use_ivar = True
 
 templates_path = ['_templates']
 exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store', '.idea']
-
-# -- Options for HTML output -------------------------------------------------
-# https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 
 # html_theme = 'alabaster'
 html_theme = 'sphinx_rtd_theme'

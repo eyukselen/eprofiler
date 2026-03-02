@@ -1,14 +1,14 @@
 [project]
 name = "eprofiler"
-version = "0.0.7"
-description = "a simple tool to monitor execution times of functions."
+version = "0.0.8"
+description = "A simple tool to monitor execution of functions."
 readme = "README.md"
 authors = [{name="emre"}]
-license = {file = "LICENSE"}
+license = "MIT"
+license-files = ["LICENSE"]
 classifiers = [
-    "Development Status :: 2 - Pre-Alpha",
+    "Development Status :: 3 - Alpha",
     "Operating System :: OS Independent",
-    "License :: OSI Approved :: MIT License",
     "Topic :: Software Development :: Libraries :: Python Modules",
     "Programming Language :: Python",
     "Programming Language :: Python :: 3",
@@ -34,6 +34,3 @@ Documentation = 'https://eprofiler.readthedocs.io/en/latest/'
 [build-system]
 requires = ["setuptools>=61.0"]
 build-backend = "setuptools.build_meta"
-
-[tool.setuptools]
-packages = ["eprofiler"]

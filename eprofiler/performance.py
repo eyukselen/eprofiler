@@ -11,18 +11,18 @@ else:
 
 
 # region timeit
-def timeit(func: Optional[Callable] = None, *, label: str = "Execution Time",
+def timeit(_func: Optional[Callable] = None, *, label: str = "Execution Time",
            callback: Optional[Callable[[Dict[str, Any]], None]] = None):
     """
     A decorator that measures the execution time of a function.
 
-    Can be used with or without parentheses.
+    Can be used without parentheses `@timeit` or with arguments `@timeit(label="TASK")`.
 
     Args:
-        func (Callable, optional): The function to monitor. Defaults to None.
-        label (str): A label to identify the output. Defaults to "Execution Time".
-        callback (Callable, optional): A function to handle the stats dictionary.
-            If None, results are printed to stdout. Defaults to None.
+        _func (Callable, optional): Internal parameter to support use as @timeit.
+        label (str): A custom tag to identify the output (default: "Execution Time").
+        callback (Callable, optional): A custom function to handle the stats' dictionary.
+            If provided, printing to stdout is bypassed.
 
     Returns:
         Callable: The wrapped function or the decorator itself.
@@ -43,8 +43,8 @@ def timeit(func: Optional[Callable] = None, *, label: str = "Execution Time",
 
             stats = {
                 "label": label,
-                "function": f.__name__,
-                "duration": duration
+                "function": f.__qualname__,
+                "duration": f"{duration:.6f}"
             }
             if callable(callback):
                 callback(stats)
@@ -54,14 +54,10 @@ def timeit(func: Optional[Callable] = None, *, label: str = "Execution Time",
 
         return wrapper
 
-    # If func is None, it means the decorator was called with ()
-    # e.g., @timer(label="Custom")
-    if func is None:
+    if _func is None:
         return decorator
 
-    # If func is NOT None, it means it was called without ()
-    # e.g., @timer
-    return decorator(func)
+    return decorator(_func)
 
 # endregion
 
@@ -69,17 +65,22 @@ def timeit(func: Optional[Callable] = None, *, label: str = "Execution Time",
 # region Timer class
 class Timer:
     """
-    A multi-purpose tool used as a context manager or a decorator to measure timing.
+        A multipurpose tool used as a context manager or a decorator to measure timing.
 
-    Example::
+        Attributes:
+            label (str): Label for the measurement.
+            stats (dict): Dictionary containing the results (label and duration).
+            start (float): The timestamp when the timer started.
 
-        with Timer("Heavy Task") as t:
-            do_work()
+        Example:
+            with Timer("Heavy Task") as t:
+                do_work()
+            print(f"Total time: {t.stats['duration']}")
 
-        @Timer("My Function")
-        def my_func():
-            pass
-    """
+            @Timer("My Function")
+            def my_func():
+                pass
+        """
 
     def __init__(self, label: str = "Execution"):
         """
@@ -89,6 +90,7 @@ class Timer:
             label (str): Label for the measurement. Defaults to "Execution".
         """
         self.label = label
+        self.start = 0.0
         self.stats: dict[str, Any] = {
             "label": label,
             "duration": None
@@ -104,8 +106,7 @@ class Timer:
         """Stops the timer and records duration on exit."""
         duration = time.perf_counter() - self.start
         self.stats["duration"] = duration
-        # print(f"{self.stats}")
-        return False  # Let exceptions propagate
+        return False
 
     def __call__(self, func: Callable):
         """
@@ -128,32 +129,33 @@ class Timer:
                 duration = time.perf_counter() - start
             stats = {
                 "label": self.label,
-                "function": func.__name__,
-                "duration": duration
+                "function": func.__qualname__,
+                "duration": f"{duration:.6f}"
             }
 
             print(f"{stats}")
             return result
 
         return wrapper
-
 # endregion
 
 
 # region memit
-def memit(func: Optional[Callable] = None, label: str = "Execution Memory",
+def memit(_func: Optional[Callable] = None, *, label: str = "Execution Memory",
           callback: Optional[Callable[[Dict[str, Any]], None]] = None):
     """
     A decorator that measures memory usage (current and peak) during function execution.
 
+    Can be used without parentheses `@memit` or with arguments `@memit(label="TASK")`.
+
     Args:
-        func (Callable, optional): The function to monitor. Defaults to None.
-        label (str): Label for the output. Defaults to "Execution Memory".
-        callback (Callable, optional): Function to handle results dictionary.
-            Defaults to None.
+        _func (Callable, optional): Internal parameter to support use as @memit.
+        label (str): A custom tag to identify the output (default: "Execution Memory").
+        callback (Callable, optional): A custom function to handle the stats' dictionary.
+            If provided, printing to stdout is bypassed.
 
     Returns:
-        Callable: The wrapped function.
+        Callable: The decorated function or a decorator factory.
     """
 
     def decorator(f):
@@ -168,7 +170,7 @@ def memit(func: Optional[Callable] = None, label: str = "Execution Memory",
                 tracemalloc.stop()
                 stats = {
                     "label": label,
-                    "function": f.__name__,
+                    "function": f.__qualname__,
                     "current": current,
                     "peak": peak
                 }
@@ -180,62 +182,64 @@ def memit(func: Optional[Callable] = None, label: str = "Execution Memory",
 
         return wrapper
 
-    if func is None:
+    if _func is None:
         return decorator
-    return decorator(func)
 
+    return decorator(_func)
 # endregion
 
 
 # region profile
-def profile(func: Optional[Callable] = None, *, label: str = "Profile"):
+def profile(_func: Optional[Callable] = None, *, label: str = "Profile",
+            callback: Optional[Callable[[Dict[str, Any]], None]] = None):
     """
-        A comprehensive decorator that measures wall time, CPU time, and memory usage.
+    A comprehensive decorator that measures wall time, CPU time, and memory usage.
 
-        Can be used with or without parentheses:
-        @profile
-        @profile(label="Custom")
-        """
+    Can be used without parentheses `@profile` or with arguments `@profile(label="TASK")`.
 
-    def decorator(func):
-        @wraps(func)
+    Args:
+        _func (Callable, optional): Internal parameter to support use as @profile.
+        label (str): A custom tag to identify the output (default: "Profile").
+        callback (Callable, optional): A custom function to handle the stats' dictionary.
+            If provided, printing to stdout is bypassed.
+
+    Returns:
+        Callable: The decorated function or a decorator factory.
+    """
+
+    def decorator(f):
+        @wraps(f)
         def wrapper(*args, **kwargs):
             tracemalloc.start()
             cpu_start = time.process_time()
             t0 = time.perf_counter()
             try:
-                res = func(*args, **kwargs)
+                res = f(*args, **kwargs)
                 t1 = time.perf_counter()
                 cpu_end = time.process_time()
                 current, peak = tracemalloc.get_traced_memory()
                 stats = {
                     "label": label,
-                    "function": func.__name__,
-                    "duration": t1 - t0,  # Converted to ms for precision
+                    "function": f.__qualname__,
+                    "duration": f"{(t1 - t0):.6f}",
+                    "cpu_time": f"{(cpu_end - cpu_start):.6f}",
                     "peak": peak,
                     "current": current,
-
-                    "cpu_time": cpu_end - cpu_start
                 }
-                print(stats)
+                if callback:
+                    callback(stats)
+                else:
+                    print(stats)
                 return res
 
             finally:
                 tracemalloc.stop()
-
-
-
         return wrapper
 
-    # If func is None, it means the decorator was called with ()
-    # e.g., @timer(label="Custom")
-    if func is None:
+    if _func is None:
         return decorator
 
-    # If func is NOT None, it means it was called without ()
-    # e.g., @timer
-    return decorator(func)
-
+    return decorator(_func)
 # endregion
 
 
@@ -257,28 +261,28 @@ else:  # pragma: no cover
 
         Returns:
             tuple: (total_cpu, None, total_cpu) where None represents
-                   the unavailable system-level split.
+                   the unavailable system-level split for windows.
         """
         total = time.process_time()
         return total, None, total
 
 
-def profile_cpu(func: Optional[Callable] = None, *, label: str = "Execution Time",
+def profile_cpu(_func: Optional[Callable] = None, *, label: str = "Execution Time",
            callback: Optional[Callable[[Dict[str, Any]], None]] = None):
     """
-        A deep-dive decorator for CPU consumption and execution efficiency.
+    A decorator for CPU time and execution efficiency.
 
-        On Unix, this provides a breakdown of 'user_time' and 'system_time'.
-        On Windows, it falls back to total CPU time. It calculates
-        Efficiency as (cpu_time / duration * 100).
+    On Unix, this provides a breakdown of 'user_time' and 'system_time'.
+    On Windows, it falls back to total CPU time. It calculates
+    Efficiency as (cpu_time / duration * 100).
 
-        Args:
-            func: The function to be profiled.
-            label: A custom string to identify the profiling run.
-            callback: Optional function to handle the stats dictionary.
+    Args:
+        _func (Callable, optional): Internal parameter to support @profile_cpu.
+        label (str): Custom tag for the profiling run (default: "CPU Profile").
+        callback (Callable, optional): Custom function to handle the stats dictionary.
 
-        Returns:
-            Any: The result of the profiled function.
+    Returns:
+        Callable: The decorated function or a decorator factory.
         """
     def decorator(f):
         @wraps(f)
@@ -296,15 +300,16 @@ def profile_cpu(func: Optional[Callable] = None, *, label: str = "Execution Time
             sys_delta = s_end - s_start if s_start is not None else None
             cpu_total = t_end - t_start
             wall_delta = wall_end - wall_start
+            # Efficiency > 100% is possible on multicore systems
             efficiency = (cpu_total / wall_delta * 100) if wall_delta > 0 else 0
             stats = {
                 "label": label,
-                "function": f.__name__,
-                "user_time": user_delta,
-                "system_time": sys_delta,
-                "cpu_time": cpu_total,
-                "duration": wall_delta,
-                "efficiency": efficiency
+                "function": f.__qualname__,
+                "user_time": f"{user_delta:.6f}" if user_delta is not None else "N/A",
+                "system_time": f"{sys_delta:.6f}" if sys_delta is not None else "N/A",
+                "cpu_time": f"{cpu_total:.6f}",
+                "duration": f"{wall_delta:.6f}",
+                "efficiency": f"{efficiency:.2f}%"
             }
             if callable(callback):
                 callback(stats)
@@ -314,10 +319,8 @@ def profile_cpu(func: Optional[Callable] = None, *, label: str = "Execution Time
 
         return wrapper
 
-    if func is None:
+    if _func is None:
         return decorator
 
-    # If func is NOT None, it means it was called without ()
-    # e.g., @timer
-    return decorator(func)
+    return decorator(_func)
 # endregion

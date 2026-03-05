@@ -2,20 +2,18 @@ import time
 import sys
 import os
 
-# to be able to import as if it is a package
+# to import as if it is a package
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from eprofiler import timeit, Timer, memit, profile, profile_cpu
 
 
-# region profile_cpu (Deep Dive)
-@profile_cpu(label="Profile_CPU")
-def function_for_profile_cpu():
-    time.sleep(1)
-    return sum(range(1000))
+# region profile_cpu
+@profile_cpu(label="Heavy Computation")
+def compute_pi():
+    return sum(1/i**2 for i in range(1, 1000000))
 
-function_for_profile_cpu()
-
+compute_pi()
 # endregion
 
 # region timeit default usage
@@ -57,14 +55,11 @@ function_for_memit()
 # endregion
 
 # region profile
-@profile(label="Profile")
-def function_for_profile():
-    a = 0
-    time.sleep(1)
-    for x in range(1000):
-        a += x
+@profile(label="Data Batch")
+def process_data():
+    return [x for x in range(1000000)]
 
-function_for_profile()
+process_data()
 # endregion
 
 # region Timer class

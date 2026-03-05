@@ -24,12 +24,12 @@ add(5, 10)
 print("\n--- 2. Auditing with Arguments (Privacy Control) ---")
 # By default, we don't log args to keep logs clean and secure.
 # Switch 'include_args' to True when you need to see the data.
-@audit(include_args=True)
+@audit(label="Audit", include_args=True)
 def create_user(username, email):
     return f"User {username} created."
 
 create_user("jdoe", "jane@example.com")
-# Output: INFO: AUDIT: {..., 'args': ('jdoe', 'jane@example.com'), ...}
+# Output: INFO: {'timestamp': '2026-03-05T18:31:53.721758', 'function': 'create_user', 'label': 'AUDIT', 'args': ('jdoe', 'jane@example.com'), 'kwargs': {}, 'status': 'SUCCESS', 'elapsed_seconds': '0.000003'}
 
 print("\n--- 3. Automatic Error Tracking ---")
 # The auditor captures the crash status before letting the error pass through.

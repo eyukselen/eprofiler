@@ -26,8 +26,9 @@ pip install eprofiler
 
 * **`@audit`**: Execution logging with `SUCCESS`/`FAIL` status and error capturing.
 * **`@timeit`**: Execution timing (microsecond precision).
-* **`@memit`**: Simple peak memory tracking using `tracemalloc`.
-* **`@profile` / `@profile_cpu`**: Combined time, memory, and CPU profiling.
+* **`@memit`**: Tracks current and peak memory usage.
+* **`@profile`**: The "All-in-One": Wall time, CPU time, and Memory. 
+* **`@profile_cpu`**: User vs System time (Unix) & Efficiency %.
 * **`Timer`**: Context manager and/or decorator for granular blocks.
 
 ---
@@ -46,15 +47,12 @@ where you need to know if a function finished, how long it took, and why it fail
 ```python
 from eprofiler import audit
 
-@audit(label="PAYMENT_GATEWAY", include_args=True)
-def process_payment(user_id, amount):
-    # Logic here...
-    return True
-
-process_payment(123, 50.0)
+@audit(label="Audit", include_args=True)
+def create_user(username, email):
+    return f"User {username} created."
 ```
-**Output (Standard Logging):**
-> INFO: {'timestamp': '2026-03-02T10:00:00.123', 'function': 'process_payment', 'label': 'PAYMENT_GATEWAY', 'args': (123, 50.0), 'status': 'SUCCESS', 'elapsed_seconds': '0.045200'}
+**Output:**
+> INFO: {'timestamp': '2026-03-05T18:33:37.651931', 'function': 'create_user', 'label': 'Audit', 'args': ('jdoe', 'jane@example.com'), 'kwargs': {}, 'status': 'SUCCESS', 'elapsed_seconds': '0.000003'}
 
 ### 2. Basic Timing (`@timeit`)
 For quick performance checks during development. By default, results are printed to the console.
@@ -71,36 +69,72 @@ my_func()
 
 **Output:** 
 
-> {'label': 'Computation', 'function': 'my_func', 'duration': 0.008421}
+> {'label': 'Computation', 'function': 'my_func', 'duration': '0.000074'}
 
-### 3. Comprehensive Profiling (`@profile`)
-Track time and memory (current and peak) simultaneously.
+### 3. Comprehensive Profiling (`@profile` & `@profile_cpu`)
+Track wall-clock time, actual CPU usage, and memory (current and peak) simultaneously.
 
 ```python
-from eprofiler import profile
+from eprofiler import profile, profile_cpu
 
-@profile(label="Heavy Task")
-def memory_intensive():
+# Standard profile (Wall Time + CPU Time + Memory)
+@profile(label="Data Batch")
+def process_data():
     return [x for x in range(1000000)]
 
-memory_intensive()
+# CPU profile (User/System breakdown + Efficiency)
+@profile_cpu(label="Heavy Computation")
+def compute_pi():
+    return sum(1/i**2 for i in range(1, 1000000))
+
+process_data()
+compute_pi()
 ```
 
-**Output:** 
-> {'label': 'Heavy Task', 'function': 'memory_intensive', 'duration': 0.041200, 'peak': 324502, 'current': 1204}
+**Output:**
+> {'label': 'Data Batch', 'function': 'process_data', 'duration': '0.241128', 'cpu_time': '0.241104', 'peak': 40440488, 'current': 40440448}
+> 
+> {'label': 'Heavy Computation', 'function': 'compute_pi', 'user_time': '0.048526', 'system_time': '0.000074', 'cpu_time': '0.048600', 'duration': '0.048610', 'efficiency': '99.98%'}
 
-### 4. Advanced: Callbacks & Custom Capture
-Instead of printing to the console, you can capture results programmatically.
+
+### 4. Using Callback 
+Instead of printing to the console, you can pass a callback function to any decorator 
+to handle the results programmatically (e.g., sending metrics to a database, Slack, or a logging service).
 
 ```python
-from eprofiler import audit
+from eprofiler import profile_cpu
 
-def my_db_callback(payload):
-    # Send payload to Datadog, Slack, or a Database
-    print(f"Captured: {payload['status']} in {payload['elapsed_seconds']}s")
+def metrics_handler(stats):
+    """Custom function to process profiling data."""
+    # Send to Datadog, CloudWatch, or an ELK stack
+    print(f"TELEMETRY: {stats['function']} ran with {stats['efficiency']} efficiency.")
 
-@audit(callback=my_db_callback)
+@profile_cpu(label="Production_Task", callback=metrics_handler)
 def sync_data():
+    # Logic here...
+    return "Done"
+
+sync_data()
+```
+Using your own `metrics_handler` you can do anything you want with stats.
+
+### 5. Timer class for codeblocks
+Timer can be used as a decoator, or can be used for code blocks for part of a function rather than whole function
+Note that `Timer` class does not have a callback
+
+```python
+from eprofiler import Timer
+import time
+
+# Use as a Context Manager
+with Timer(label="External API Call") as t:
+    time.sleep(0.5)  # Simulate a network delay
+
+print(f"Result: {t.stats['label']} took {t.stats['duration']:.6f}s")
+
+# Also works as a decorator for simple timing
+@Timer(label="Quick Check")
+def short_task():
     pass
 ```
 

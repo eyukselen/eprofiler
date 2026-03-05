@@ -1,34 +1,38 @@
 [project]
 name = "eprofiler"
-version = "0.0.8"
-description = "A simple tool to monitor execution of functions."
+version = "0.1.0b1"
+description = "A lightweight tool to monitor execution of functions."
 readme = "README.md"
 authors = [{name="emre"}]
 license = {file = "LICENSE"}
 classifiers = [
-    "Development Status :: 3 - Alpha",
+    "Development Status :: 4 - Beta",
     "Operating System :: OS Independent",
     "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: Software Development :: Debuggers",
+    "Topic :: Software Development :: Testing",
+    "Topic :: System :: Benchmark",
+    "Topic :: System :: Monitoring",
+    "Topic :: Utilities",
     "Programming Language :: Python",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.4", # Explicitly include 3.4
-    "Programming Language :: Python :: 3.5",
-    "Programming Language :: Python :: 3.6",
-    "Programming Language :: Python :: 3.7",
     "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14"
 ]
-keywords = ["profiling", "Profilers"]
-requires-python = ">=3.4"
+keywords = ["profiling", "profiler", "metrics", "performance", "monitoring", "audit", "timer"]
+requires-python = ">=3.8"
 dependencies = []
 
 [project.urls]
 Homepage = 'https://github.com/eyukselen/eprofiler'
 Documentation = 'https://eprofiler.readthedocs.io/en/latest/'
 "Source Code" = 'https://github.com/eyukselen/eprofiler'
+Changelog = "https://github.com/eyukselen/eprofiler/releases"
 
 [build-system]
 requires = ["setuptools>=61.0"]

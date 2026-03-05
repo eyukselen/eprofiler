@@ -4,8 +4,7 @@ version = "0.0.8"
 description = "A simple tool to monitor execution of functions."
 readme = "README.md"
 authors = [{name="emre"}]
-license = "MIT"
-license-files = ["LICENSE"]
+license = {file = "LICENSE"}
 classifiers = [
     "Development Status :: 3 - Alpha",
     "Operating System :: OS Independent",

@@ -2,8 +2,12 @@ import time
 from functools import wraps
 import tracemalloc
 from typing import Callable, Any, Optional, Dict
-import resource
 import sys
+
+if sys.platform != "win32":
+    import resource
+else:
+    resource = None
 
 
 # region timeit

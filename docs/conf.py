@@ -1,9 +1,10 @@
 import sys
 import os
-import eprofiler
-
 
 sys.path.insert(0, os.path.abspath(".."))
+
+import eprofiler
+
 
 project = "eprofiler"
 copyright = "2026, emre"
@@ -31,3 +32,8 @@ exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store', '.idea']
 # html_theme = 'alabaster'
 html_theme = 'sphinx_rtd_theme'
 html_static_path = ['_static']
+
+html_theme_options = {
+    'display_version': True,
+    'logo_only': False,
+}

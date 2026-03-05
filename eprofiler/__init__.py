@@ -3,4 +3,4 @@ from .auditor import audit
 
 
 __all__ = ["timeit", "Timer", "memit", "profile", "profile_cpu", "audit"]
-__version__ = "0.1.0b1"
+__version__ = "0.1.0"

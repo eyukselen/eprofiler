@@ -1,6 +1,6 @@
 [project]
 name = "eprofiler"
-version = "0.1.0b1"
+version = "0.1.0"
 description = "A lightweight tool to monitor execution of functions."
 readme = "README.md"
 authors = [{name="emre"}]

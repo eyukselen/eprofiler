@@ -42,8 +42,23 @@ The `@profile` decorator is your "all-in-one" tool. It measures wall-clock durat
         data = [i for i in range(1000000)]
         return sum(data)
 
-    # The result is a dictionary-like object containing:
-    # {'label': 'System Audit', 'duration': 0.12, 'cpu_time': 0.11, 'peak_mb': 32.4, ...}
+The result is a dictionary-like object containing:
+{'label': 'System Audit', 'duration': 0.12, 'cpu_time': 0.11, 'peak_mb': 32.4, ...}
+
+Dynamic usage:
+
+.. code-block:: python
+
+    from eprofiler import profile
+
+    def audit_function():
+        data = [i for i in range(1000000)]
+        return sum(data)
+
+    profiled_test = profile(audit_function, label="System Audit")
+
+    profiled_test()  # this will print the stats
+
 
 CPU Forensic Profiling (`@profile_cpu`)
 ---------------------------------------

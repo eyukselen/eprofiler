@@ -3,9 +3,11 @@
 **A lightweight, zero-dependency toolkit to monitor execution of functions or code blocks.**
 
 [![PyPI](https://img.shields.io/pypi/v/eprofiler.svg?color=blue)](https://pypi.org/project/eprofiler/)
-[![Build Status](https://github.com/eyukselen/eprofiler/actions/workflows/python-tests.yml/badge.svg)](https://github.com/eyukselen/eprofiler/actions)
-[![License](https://img.shields.io/badge/license-MIT-orange.svg)](https://opensource.org/licenses/MIT)
 [![Documentation](https://readthedocs.org/projects/eprofiler/badge/?version=latest)](https://eprofiler.readthedocs.io/en/latest/?badge=latest)
+[![Build Status](https://github.com/eyukselen/eprofiler/actions/workflows/python-tests.yml/badge.svg)](https://github.com/eyukselen/eprofiler/actions)
+[![Python Versions](https://img.shields.io/pypi/pyversions/eprofiler)](https://pypi.org/project/eprofiler/)
+[![License](https://img.shields.io/badge/license-MIT-orange.svg)](https://opensource.org/licenses/MIT)
+
 
 
 `eprofiler` provides decorators and context managers to observe execution time, cpu time, peak memory and arguments used for a function.  
